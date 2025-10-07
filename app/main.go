@@ -27,17 +27,18 @@ func main() {
 		os.Exit(1)
 	}
 	buff := make([]byte, 256)
-	go func(){
-	for {
-		n, err := conn.Read(buff)
-		if err != nil {
-			fmt.Println("Error reading from connection: ", err.Error())
-			os.Exit(1)
-		}
-		fmt.Println(n)
+	defer conn.Close()
+	go func() {
+		for {
+			n, err := conn.Read(buff)
+			if err != nil {
+				fmt.Println("Error reading from connection: ", err.Error())
+				os.Exit(1)
+			}
+			fmt.Println(n)
 
-		conn.Write([]byte("+PONG\r\n"))
-	}
+			conn.Write([]byte("+PONG\r\n"))
+		}
 	}()
 
 }
