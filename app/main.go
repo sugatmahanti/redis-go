@@ -27,6 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 	buff := make([]byte, 256)
+	go func(){
 	for {
 		n, err := conn.Read(buff)
 		if err != nil {
@@ -37,4 +38,6 @@ func main() {
 
 		conn.Write([]byte("+PONG\r\n"))
 	}
+	}()
+
 }
