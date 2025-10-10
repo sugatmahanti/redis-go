@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(fd:*)",
+      "Bash(fzf:*)",
+      "Bash(yq:*)",
+      "Bash(go run:*)",
+      "Bash(redis-cli:*)",
+      "Bash(nc localhost 6379)",
+      "Bash(brew install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

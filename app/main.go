@@ -2,21 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
-	"io"
+	"strings"
 )
 
-// Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
-var _ = net.Listen
-var _ = os.Exit
-
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
-	// Uncomment this block to pass the first stage
-	//
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
 		fmt.Println("Failed to bind to port 6379")
@@ -33,17 +27,50 @@ func main() {
 			for {
 				n, err := conn.Read(buff)
 				if err == io.EOF {
-					break 
+					break
 				}
 				if err != nil {
 					fmt.Println("Error reading from connection: ", err.Error())
 					os.Exit(1)
 				}
-				fmt.Println(n)
 
-				conn.Write([]byte("+PONG\r\n"))
+				if n > 0 {
+
+					input := string(buff[:n])
+
+					msg := extractRESPString(input)
+					fmt.Println(msg)
+					response := ""
+					if strings.ToUpper(msg[0]) == "ECHO" {
+						response = fmt.Sprintf("$%d\r\n%s\r\n", len(msg[1]), msg[1])
+					} else if strings.ToUpper(msg[0]) == "PING" {
+						response = fmt.Sprintf("+PONG\r\n")
+					}
+					conn.Write([]byte(response))
+				}
 			}
 		}()
 	}
+}
 
+func extractRESPString(input string) []string {
+
+	chars := strings.Split(input, "\r\n")
+
+	if chars[0][0] == '*' {
+		cmd := []string{}
+		for i := 0; i < len(chars); i++ {
+			if len(chars[i]) > 0 && chars[i][0] == '$' {
+				i++
+				if i < len(chars) {
+					cmd = append(cmd, chars[i])
+				}
+			}
+		}
+
+		return cmd
+
+	}
+
+	return []string{}
 }
