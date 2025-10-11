@@ -23,6 +23,7 @@ func main() {
 			os.Exit(1)
 		}
 		buff := make([]byte, 256)
+		redisMap := make(map[string]string, 10)
 		go func() {
 			for {
 				n, err := conn.Read(buff)
@@ -41,11 +42,18 @@ func main() {
 					msg := extractRESPString(input)
 					fmt.Println(msg)
 					response := ""
-					if strings.ToUpper(msg[0]) == "ECHO" {
+					switch strings.ToUpper(msg[0]) {
+					case "ECHO":
 						response = fmt.Sprintf("$%d\r\n%s\r\n", len(msg[1]), msg[1])
-					} else if strings.ToUpper(msg[0]) == "PING" {
-						response = fmt.Sprintf("+PONG\r\n")
+					case "PING":
+						response = fmt.Sprintf("+%s\r\n", "PONG")
+					case "GET":
+						response = fmt.Sprintf("$%d\r\n%s\r\n", len(redisMap[msg[1]]), redisMap[msg[1]])
+					case "SET":
+						redisMap[msg[1]] = msg[2]
+						response = fmt.Sprintf("+%s\r\n", "OK")
 					}
+
 					conn.Write([]byte(response))
 				}
 			}
