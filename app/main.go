@@ -131,7 +131,7 @@ func extractRESPString(input string) []string {
 
 	chars := strings.Split(input, "\r\n")
 
-	if chars[0][0] == '*' {
+	if len(chars) > 0 && len(chars[0]) > 0 && chars[0][0] == '*' {
 		cmd := []string{}
 		for i := 0; i < len(chars); i++ {
 			if len(chars[i]) > 0 && chars[i][0] == '$' {
